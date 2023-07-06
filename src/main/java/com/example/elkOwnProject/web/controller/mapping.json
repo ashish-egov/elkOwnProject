@@ -1,0 +1,11 @@
+{
+  "mappings": {
+    "_default_": {
+      "properties": {
+        "message": {
+          "type": "text"
+        }
+      }
+    }
+  }
+}
