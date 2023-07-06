@@ -28,17 +28,38 @@ services:
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
       ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      ENTERPRISE_SEARCH_HOST: http://enterprise-search:3002
     ports:
       - 5601:5601
     networks:
       - elk
     depends_on:
       - elasticsearch
+      - ent-search
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
+
+  ent-search:
+    image: docker.elastic.co/enterprise-search/enterprise-search:7.13.2
+    restart: unless-stopped
+    depends_on:
+      - "elasticsearch"
+    environment:
+      - "JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ENT_SEARCH_DEFAULT_PASSWORD=changeme"
+      - "elasticsearch.username=elastic"
+      - "elasticsearch.password=changeme"
+      - "elasticsearch.host=http://elasticsearch:9200"
+      - "allow_es_settings_modification=true"
+      - "secret_management.encryption_keys=[4a2cd3f81d39bf28738c10db0ca782095ffac07279561809eecc722e0c20eb09]"
+      - "elasticsearch.startup_retry.interval=15"
+    ports:
+      - 127.0.0.1:3002:3002
+    networks:
+      - elk
 
 networks:
   elk:
